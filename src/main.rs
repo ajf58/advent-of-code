@@ -16,14 +16,11 @@ fn main() {
         .collect();
     let mut frequency_offsets = HashSet::new(); 
     let mut current_offset = 0;
-    let mut found = false;
-    while !found {
-        for shift in &frequency_shifts {
-            current_offset += shift;
-            found = !frequency_offsets.insert(current_offset);
-            if found {
-                break
-            }
+    for shift in frequency_shifts.iter().cycle() {
+        current_offset += shift;
+        // Record the current offset. If the offset has been visited before, then break.
+        if !frequency_offsets.insert(current_offset) {
+            break
         }
     }
 
