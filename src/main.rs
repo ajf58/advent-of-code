@@ -10,7 +10,7 @@ fn main() {
     let f = File::open(filename).unwrap();
     let f = BufReader::new(f);
 
-    // Iterate over each line, parsing each line as a signed int, and sum.
+    // Iterate over each line, parsing each line as a signed int.
     let frequency_shifts: Vec<i32> = f.lines()
         .map(|line| line.unwrap().parse::<i32>().unwrap())
         .collect();
