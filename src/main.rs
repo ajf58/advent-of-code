@@ -1,12 +1,26 @@
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::collections::HashSet;
+use std::collections::{HashMap,HashSet};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    day01(&args)
+    let filename = &args[1];
+    let f = File::open(filename).unwrap();
+    let f = BufReader::new(f);
+
+    let mut letters = HashMap::new();
+    for box_id in f.lines() {
+        // How many times does this letter appear in the box ID?
+        for letter in line.unwrap().chars() {
+            let count = letters.entry(letter).or_insert(0);
+            *count += 1;
+        }
+        for (_, letter_count) in &letters {
+
+        }
+    }
 }
 
 fn day01(args: &Vec<String>) {
@@ -18,7 +32,7 @@ fn day01(args: &Vec<String>) {
     let frequency_shifts: Vec<i32> = f.lines()
         .map(|line| line.unwrap().parse::<i32>().unwrap())
         .collect();
-    let mut frequency_offsets = HashSet::new(); 
+    let mut frequency_offsets = HashSet::new();
     let mut current_offset = 0;
     for shift in frequency_shifts.iter().cycle() {
         current_offset += shift;
