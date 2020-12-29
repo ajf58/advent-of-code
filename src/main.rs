@@ -4,7 +4,44 @@ use std::io::{BufRead, BufReader};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    day02(&args);
+    day03(&args);
+}
+
+fn day03(args: &Vec<String>) {
+    let filename = &args[1];
+    let f = File::open(filename).unwrap();
+    let f = BufReader::new(f);
+
+    /*
+    Right 1, down 1.
+    Right 3, down 1. (This is the slope you already checked.)
+    Right 5, down 1.
+    Right 7, down 1.
+    Right 1, down 2. count every other row? row 0, 2, 4, ...
+    */
+    let mut num_trees = [0; 5];
+    // traverse right 3, down 1, Looping around.
+    // We always start on an empty square, so skip the first row.
+    for (i, line) in f.lines().enumerate() {
+        if i == 0 {
+            continue;
+        }
+        let row = line.unwrap();
+        let len = row.len();
+        //println!("Result {:?} {:?} {:?}", row, offset, cell_contents);
+        for j in 0..4 {
+            if let Some('#') = row.chars().nth((i * ((2 * j) + 1)) % len) {
+                num_trees[j] += 1;
+            }
+        }
+        if i % 2 == 0 {
+            if let Some('#') = row.chars().nth((i / 2) % len) {
+                num_trees[4] += 1;
+            }
+        }
+    }
+    let result: u64 = num_trees.iter().fold(1, |acc, x| (acc * x));
+    println!("Result {:?}, {:?}", num_trees, result);
 }
 
 fn day02(args: &Vec<String>) {
