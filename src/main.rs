@@ -20,20 +20,19 @@ fn day03(args: &Vec<String>) {
     Right 1, down 2. count every other row? row 0, 2, 4, ...
     */
     let mut num_trees = [0; 5];
-    // traverse right 3, down 1, Looping around.
-    // We always start on an empty square, so skip the first row.
     for (i, line) in f.lines().enumerate() {
+        // We always start on an empty square, so skip the first row.
         if i == 0 {
             continue;
         }
         let row = line.unwrap();
         let len = row.len();
-        //println!("Result {:?} {:?} {:?}", row, offset, cell_contents);
         for j in 0..4 {
             if let Some('#') = row.chars().nth((i * ((2 * j) + 1)) % len) {
                 num_trees[j] += 1;
             }
         }
+        // Handle right 1, down 2.
         if i % 2 == 0 {
             if let Some('#') = row.chars().nth((i / 2) % len) {
                 num_trees[4] += 1;
