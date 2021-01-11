@@ -1,10 +1,34 @@
+use std::collections::HashSet;
 use std::env;
+use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::string;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    day03(&args);
+    day04(&args);
+}
+
+// Detect which passports have all required fields.
+fn day04(args: &Vec<String>) {
+    let filename = &args[1];
+    let mut valid_passports: u32 = 0;
+    let records = fs::read_to_string(filename).expect("Unable to read file");
+    for record in records.split("\n\n") {
+        // Verify if any fields are missing.
+        let passport_keys: Vec<_> =
+        record.split_ascii_whitespace().map(|x| &x[..3]).collect();
+
+        // Passport is valid if all the required fields are present.
+        let valid_passport = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
+            .iter()
+            .all(|x| record.contains(x));
+        if valid_passport {
+            valid_passports += 1;
+        }
+    }
+    println!("Result {:?}", valid_passports);
 }
 
 fn day03(args: &Vec<String>) {
@@ -55,18 +79,18 @@ fn day02(args: &Vec<String>) {
     for line in f.lines() {
         let s = line.unwrap();
         let v: Vec<&str> = s.split_whitespace().collect();
-        let range: Vec<u32> = v[0].split('-')
-            .map(|x| x.parse::<u32>().unwrap())
-            .collect();
+        let range: Vec<u32> = v[0].split('-').map(|x| x.parse::<u32>().unwrap()).collect();
         let min = &range[0];
         let max = &range[1];
         let policy_char = v[1].chars().nth(0).unwrap();
         let num_chars: u32 = v[2].chars().filter(|x| *x == policy_char).count() as u32;
-        
+
         if (min <= &num_chars) && (&num_chars <= max) {
             policy_a += 1;
         }
-        if (v[2].chars().nth((*min - 1) as usize).unwrap() == policy_char) ^ (v[2].chars().nth((*max - 1) as usize).unwrap() == policy_char) {
+        if (v[2].chars().nth((*min - 1) as usize).unwrap() == policy_char)
+            ^ (v[2].chars().nth((*max - 1) as usize).unwrap() == policy_char)
+        {
             policy_b += 1;
         }
     }
@@ -79,7 +103,8 @@ fn day01(args: &Vec<String>) {
     let f = BufReader::new(f);
 
     // Iterate over each line, parsing each line as an unsigned int.
-    let expenses: Vec<u32> = f.lines()
+    let expenses: Vec<u32> = f
+        .lines()
         .map(|line| line.unwrap().parse::<u32>().unwrap())
         .collect();
     day01part01(&expenses);
