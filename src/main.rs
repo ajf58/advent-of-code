@@ -1,13 +1,37 @@
-use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::string;
+
+use regex::Regex;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     day04(&args);
+}
+
+fn valid_year(value: &str, min: u32, max: u32) -> bool {
+    match value.parse::<u32>() {
+        Ok(year) => (year >= min) && (year <= max),
+        Err(e) => false,
+    }
+}
+
+fn valid_height(value: &str) -> bool {
+    /*
+    hgt (Height) - a number followed by either cm or in:
+        If cm, the number must be at least 150 and at most 193.
+        If in, the number must be at least 59 and at most 76.
+    */
+    let number = match value[..value.len() - 2].parse::<u32>() {
+        Ok(number) => number,
+        Err(e) => 0,
+    };
+    match &value[value.len() - 2..] {
+        "cm" => (number >= 150) && (number <= 193),
+        "in" => (number >= 59) && (number <= 76),
+        _ => false,
+    }
 }
 
 // Detect which passports have all required fields.
@@ -17,11 +41,41 @@ fn day04(args: &Vec<String>) {
     let records = fs::read_to_string(filename).expect("Unable to read file");
     for record in records.split("\n\n") {
         // Verify if any fields are missing.
-        let passport_keys: Vec<_> =
-        record.split_ascii_whitespace().map(|x| &x[..3]).collect();
+        let mut valid_passport = true;
+        for kv in record.split_ascii_whitespace() {
+            //println!("{:?}", kv);
+            let key = &kv[..3];
+            let value = &kv[4..];
+            /*
+                byr (Birth Year) - four digits; at least 1920 and at most 2002.
+                iyr (Issue Year) - four digits; at least 2010 and at most 2020.
+                eyr (Expiration Year) - four digits; at least 2020 and at most 2030.
 
-        // Passport is valid if all the required fields are present.
-        let valid_passport = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
+                hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
+                ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
+                pid (Passport ID) - a nine-digit number, including leading zeroes.
+                cid (Country ID) - ignored, missing or not.
+            */
+            let valid_value = match key {
+                "byr" => valid_year(value, 1920, 2002),
+                "iyr" => valid_year(value, 2010, 2020),
+                "eyr" => valid_year(value, 2020, 2030),
+                "hgt" => valid_height(value),
+                "hcl" => (value.len() == 7) && Regex::new(r"#[0-9a-f]{6}").unwrap().is_match(value),
+                "ecl" => ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&value),
+                "pid" => (value.len() == 9) && Regex::new(r"[0-9]{9}").unwrap().is_match(value),
+                "cid" => true,
+                _ => false,
+            };
+            if !valid_value {
+                //println!("Invalid {:?}", kv);
+                valid_passport = false;
+                break;
+            }
+        }
+
+        // Passport is valid if all the required fields are present, and no fields were invalid.
+        valid_passport &= ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
             .iter()
             .all(|x| record.contains(x));
         if valid_passport {
