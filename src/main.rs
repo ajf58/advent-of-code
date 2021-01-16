@@ -7,7 +7,40 @@ use regex::Regex;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    day04(&args);
+    day05(&args);
+}
+
+// Binary Boarding. Decode the boarding passes to find the highest seat ID.
+fn day05(args: &Vec<String>) {
+    let filename = &args[1];
+    let f = File::open(filename).unwrap();
+    let f = BufReader::new(f);
+
+    let mut max_id: u32 = 0;
+    //let boarding_passes = fs::read_to_string(filename).expect("Unable to read file");
+    for line in f.lines() {
+        let boarding_pass = line.unwrap();
+        let mut column = 0;
+        let mut row = 0;
+        for (i, c) in boarding_pass[7..].chars().rev().enumerate() {
+            column += match c {
+                'R' => 1 << i,
+                _ => 0,
+            };
+        }
+        for (i, c) in boarding_pass[..7].chars().rev().enumerate() {
+            row += match c {
+                'B' => 1 << i,
+                _ => 0,
+            };
+        }
+        let seat_id = (row * 8) + column;
+        if seat_id > max_id {
+            max_id = seat_id;
+        }
+        //println!("{:?}: row {:?}, column {:?}, seat ID {:?}", boarding_pass, row, column, seat_id);
+    }
+    println!("Max ID: {:?}", max_id);
 }
 
 fn valid_year(value: &str, min: u32, max: u32) -> bool {
