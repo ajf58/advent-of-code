@@ -8,7 +8,25 @@ use regex::Regex;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    day05(&args);
+    day06(&args);
+}
+
+fn day06(args: &Vec<String>) {
+    let filename = &args[1];
+    let mut answers = HasSet::new();
+
+    let mut total_ans: u32 = 0;
+    let groups = fs::read_to_string(filename).expect("Unable to read file");
+    for group in groups.split("\n\n") {
+        answers.clear();
+        for person in group.split("\n") {
+            for answer in person.chars() {
+                answers.insert(answer);
+            }
+        }
+        total_ans += answers.len() as u32;
+    }
+    println!("{:?}", total_ans)
 }
 
 // Binary Boarding. Decode the boarding passes to find the highest seat ID.
@@ -17,7 +35,7 @@ fn day05(args: &Vec<String>) {
     let f = File::open(filename).unwrap();
     let f = BufReader::new(f);
     let mut seat_ids: HashSet<u32> = HashSet::new();
-    
+
     let mut max_id: u32 = 0;
     //let seat_ids = fs::read_to_string(filename).expect("Unable to read file");
     for line in f.lines() {
@@ -43,14 +61,14 @@ fn day05(args: &Vec<String>) {
         }
         //println!("{:?}: row {:?}, column {:?}, seat ID {:?}", boarding_pass, row, column, seat_id);
     }
-    
+
     // Part two. The seats with IDs +1 and -1 from yours will be in your list.
     let mut my_seat_id = 0;
     for i in 0..max_id {
         if seat_ids.contains(&i) && seat_ids.contains(&(i + 2)) && !seat_ids.contains(&(i + 1)) {
             my_seat_id = &i + 1;
             break;
-        } 
+        }
     }
     println!("Max ID: {:?}, My seat ID: {:?}", max_id, my_seat_id);
 }
