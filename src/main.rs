@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fs;
 use std::fs::File;
@@ -13,20 +13,31 @@ fn main() {
 
 fn day06(args: &Vec<String>) {
     let filename = &args[1];
-    let mut answers = HasSet::new();
+    let mut answers = HashMap::new();
 
+    let mut everyone_yes: u32 = 0;
     let mut total_ans: u32 = 0;
     let groups = fs::read_to_string(filename).expect("Unable to read file");
     for group in groups.split("\n\n") {
         answers.clear();
-        for person in group.split("\n") {
+        let mut num_people = 0;
+        for person in group.lines() {
+            num_people += 1;
             for answer in person.chars() {
-                answers.insert(answer);
+                let mut count = answers.entry(answer).or_insert(0);
+                *count += 1;
+            }
+        }
+        // Determine how many answers were answered yes by everyone in the
+        // group
+        for (answer, count) in &answers {
+            if *count == num_people {
+                everyone_yes += 1;
             }
         }
         total_ans += answers.len() as u32;
     }
-    println!("{:?}", total_ans)
+    println!("Total answers: {:?} All yes: {:?}", total_ans, everyone_yes)
 }
 
 // Binary Boarding. Decode the boarding passes to find the highest seat ID.
