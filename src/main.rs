@@ -8,7 +8,62 @@ use regex::Regex;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    day06(&args);
+    day07(&args);
+}
+
+fn contains_gold(bags: &HashMap<String, String>, colour: &str) -> bool {
+    let mut result = false;
+    let contents = &bags[colour];
+    if contents.contains("shiny gold") {
+        result = true;
+    }
+    else if contents.contains("no other bags") {
+        result = false;
+    }
+    else {
+        for c in bags.keys() {
+            if contents.contains(c) {
+                result = contains_gold(bags, c);
+            }
+            if result {
+                // Stop as soon as this contains a gold bag.
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+fn day07(args: &Vec<String>) {
+
+    // how many colors can, eventually, contain at least one shiny gold bag?
+    // Bag colours are the first two words in a line,
+    // Rules are <n> <colour> bags(s)
+    // comma delimited, or "no other bags"
+    let filename = &args[1];
+    let mut bags = HashMap::new();
+
+    let mut everyone_yes: u32 = 0;
+    let mut total_ans: u32 = 0;
+    let rules = fs::read_to_string(filename).expect("Unable to read file");
+    for rule in rules.lines() {
+        let words: Vec<&str> = rule.split_ascii_whitespace().collect();
+        // Get the two-word colour.
+        let mut colour = words[0].to_owned() + " " + words[1];
+        let key = (words[0].clone(), words[1].clone());
+        let contents: Vec<&str> = rule.rsplit("contain").collect();
+        bags.insert(colour, contents[0].to_owned());
+    }
+    
+    let mut gold_filled_bags = 0;
+    for (colour, contents) in &bags {
+        //println!("{:?}", colour);
+        if contains_gold(&bags, colour) {
+            gold_filled_bags += 1;
+        }
+    }
+   
+    println!("Gold containing bags: {:?}", gold_filled_bags);
 }
 
 fn day06(args: &Vec<String>) {
